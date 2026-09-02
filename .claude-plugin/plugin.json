@@ -1,0 +1,17 @@
+{
+  "name": "spec-driven-development",
+  "displayName": "Spec Driven Development",
+  "version": "1.0.0",
+  "description": "Approval-gated specification planning and actual-diff verification for complex software changes.",
+  "author": {
+    "name": "Andrei Iatsuk",
+    "url": "https://github.com/aiatsuk"
+  },
+  "keywords": [
+    "specification",
+    "planning",
+    "verification",
+    "human-approval",
+    "software-delivery"
+  ]
+}

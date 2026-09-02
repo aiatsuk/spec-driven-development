@@ -1,0 +1,106 @@
+[
+  {
+    "query": "/spec new We need offline-first invoice editing in the iPad app; preserve current audit history and propose the full plan before coding.",
+    "should_trigger": true
+  },
+  {
+    "query": "I recorded a messy voice note for a cross-service refund workflow. Decompose it deeply, identify the real decisions, and stop for my approval before implementation.",
+    "should_trigger": true
+  },
+  {
+    "query": "Turn this migration idea into an implementation-ready spec with states, contracts, rollback, risks, exact verification, and dependent tasks.",
+    "should_trigger": true
+  },
+  {
+    "query": "We approved the plan yesterday, but I changed one of the API guarantees. Can you check whether apply is still allowed and continue safely?",
+    "should_trigger": true
+  },
+  {
+    "query": "/spec verify Compare the real diff with what we approved, including config and generated files, and tell me whether completion is honest.",
+    "should_trigger": true
+  },
+  {
+    "query": "Before anyone codes this permissions redesign, I want a compact Review Brief plus the detailed behavioral and security specification behind it.",
+    "should_trigger": true
+  },
+  {
+    "query": "Iterate from this product idea through L0-L7 decomposition, impact hypotheses, verification cases, and a dependency-aware delivery plan.",
+    "should_trigger": true
+  },
+  {
+    "query": "Design a safe database sharding rollout. Ask only questions that change behavior, compatibility, money, risk, or the test oracle; I will approve before apply.",
+    "should_trigger": true
+  },
+  {
+    "query": "Our feature is implemented but touched an unplanned shared library. Run post-implementation review, derive the missing checks, and do not mark it done prematurely.",
+    "should_trigger": true
+  },
+  {
+    "query": "Use spec-driven development for a new guest-checkout flow and keep raw stakeholder wording traceable through requirements and tests.",
+    "should_trigger": true
+  },
+  {
+    "query": "Rename the local variable tmp to response_body in this one function and run the existing formatter.",
+    "should_trigger": false
+  },
+  {
+    "query": "What does HTTP 409 mean? Give me a two-sentence explanation.",
+    "should_trigger": false
+  },
+  {
+    "query": "Review this already-open pull request for correctness and leave no comments; just summarize findings.",
+    "should_trigger": false
+  },
+  {
+    "query": "The unit test says expected 3 but got 4. Diagnose the immediate cause from this stack trace; do not implement a fix.",
+    "should_trigger": false
+  },
+  {
+    "query": "Generate an OpenAPI YAML document from these five existing endpoints without changing their behavior.",
+    "should_trigger": false
+  },
+  {
+    "query": "Please summarize the attached hardware specification sheet into a short purchasing checklist.",
+    "should_trigger": false
+  },
+  {
+    "query": "Add unit tests for the two files I just changed, following the repository's current test conventions.",
+    "should_trigger": false
+  },
+  {
+    "query": "Show git status and tell me which files are modified. Read-only only.",
+    "should_trigger": false
+  },
+  {
+    "query": "Format this existing implementation plan as a Markdown table; do not analyze or change its content.",
+    "should_trigger": false
+  },
+  {
+    "query": "We have a production incident right now. Follow the incident runbook and mitigate the active outage; planning a new feature is not the task.",
+    "should_trigger": false
+  },
+  {
+    "query": "/spec check PR #67 — work out every corner case this payment retry could break and how to prove it.",
+    "should_trigger": true
+  },
+  {
+    "query": "Here is TASK-142 and the branch that implements it. Figure out what could go wrong, design detailed test cases with exact steps and oracles, and tell me what to set up first.",
+    "should_trigger": true
+  },
+  {
+    "query": "I just described a change out loud: we retry charges now. Reconstruct what actually changed in the diff and build me a verification plan before anyone tests it manually.",
+    "should_trigger": true
+  },
+  {
+    "query": "Run the existing unit test file for the retry module and paste the output.",
+    "should_trigger": false
+  },
+  {
+    "query": "What is the difference between at-least-once and exactly-once delivery? Just explain it.",
+    "should_trigger": false
+  },
+  {
+    "query": "Reformat this YAML file so the indentation is consistent.",
+    "should_trigger": false
+  }
+]

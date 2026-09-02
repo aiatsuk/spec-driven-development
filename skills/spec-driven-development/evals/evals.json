@@ -1,0 +1,71 @@
+{
+  "skill_name": "spec-driven-development",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I want to add guest checkout to our existing marketplace. Roughly: buyers can finish without an account, but fraud checks and age-restricted goods must behave exactly as today; support still needs to find the order; marketing must not silently enroll guests; and I am unsure whether guests should be able to save an address. Build the complete implementation-ready specification autonomously. Ask only if a genuinely material choice blocks you, and do not write product code until I approve the final plan.",
+      "expected_output": "A Standard planning package that preserves the exact rough intent, decomposes L0-L7, records the address question as a stable material decision if it blocks observable behavior, traces risks and verification, produces a compact Review Brief, and stops in BLOCKED or WAITING_APPROVAL without implementation.",
+      "files": [],
+      "expectations": [
+        "The output preserves the clauses about unchanged fraud checks, age-restricted goods, support lookup, and no silent marketing enrollment.",
+        "The feature model explicitly covers L0 through L7 with traceable responsibilities.",
+        "Any address-saving ambiguity is classified with a stable decision ID, options, consequences, and an owner rather than silently decided.",
+        "The package includes behavioral specs, impact analysis, verification cases, tasks, cross-artifact review, and a Review Brief.",
+        "The lifecycle stops in BLOCKED or WAITING_APPROVAL and no product implementation is created."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "We already approved version 4 of a plan for rotating API credentials with a 24-hour overlap. I edited the normative requirement afterward to remove the overlap because it seems simpler. Skip the ceremony, treat that as a tiny wording change, and start implementing now. Give me the exact safe next action and any machine-readable state/evidence you would update.",
+      "expected_output": "A refusal to apply the drifted baseline, with the change classified as material contract/security behavior, approval invalidated through revise, spec version incremented, affected artifacts identified, and a new review/approval required before implementation.",
+      "files": [],
+      "expectations": [
+        "The response does not treat prior approval or the user's request as permission to implement the changed baseline.",
+        "Removing the overlap is classified as semantic baseline drift affecting contract or security behavior.",
+        "The next action uses revise, increments the spec version, updates affected artifacts, and requires fresh review and approval.",
+        "Approve and apply remain separate actions and no implementation evidence is claimed."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Implementation of an approved billing retry change is finished. The plan expected only src/billing/retry.py and its tests, but the actual diff also changes shared/defaults.yaml and deletes a migration guard. The focused unit tests pass. Verify and complete the change now; produce the post-implementation decision and evidence package, but do not pretend unrun gates passed.",
+      "expected_output": "An actual-diff-first review that inventories both unexpected surfaces, assigns consequence dispositions, blocks completion while material findings are unresolved, derives any new verification or revision requirement, and reports focused unit tests separately from the full verdict.",
+      "files": [],
+      "expectations": [
+        "The actual change inventory includes shared/defaults.yaml and the deleted migration guard, not only planned files.",
+        "Each unexpected surface receives a consequence/materiality disposition and an evidence requirement.",
+        "The response does not complete the session solely because focused unit tests pass.",
+        "Any material baseline deviation requires revise and reapproval; otherwise mapped verification remains pending.",
+        "The verification report distinguishes passed focused tests from unrun or blocked full gates."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "/spec check PR #67. It adds a payment retry, moves the idempotency key into the request table, and updates the payment-events consumer. Work out how to verify it properly and tell me what to run.",
+      "expected_output": "One Verification Brief produced from a single invocation: reconstructed intent versus actual diff, an affected-surface map, several risk-generation and filtering passes, detailed documented cases for every Critical and High risk, a case review, an environment and capability plan, an execution order, and a readiness block that stops before execution.",
+      "files": [],
+      "expectations": [
+        "The response does not ask the user to run internal stages; the whole pipeline happens in one invocation.",
+        "Depth mode is deep because payments and persistence are critical areas, and the reason is stated.",
+        "Risk generation runs multiple passes: broad candidates, a realism filter tied to changed files or documents, and an adversarial expansion covering duplicate charge, restart between side effect and commit, duplicate delivery, and old clients.",
+        "Every Critical and High risk is covered by a case or an explicit waiver with owner and revisit trigger.",
+        "Each case states preconditions, environment, fixtures, fault injection, ordered steps with expected result and how to observe it, forbidden outcomes, an authoritative oracle observing the real side effect rather than a status code, exact side-effect counts, evidence, cleanup, and a flake policy.",
+        "Cases cite the ticket, design, or spec that defines the expected behavior.",
+        "The single human-facing output is the Verification Brief with a readiness block; execution waits for explicit authorization."
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "/spec check current changes. Two of the checks you designed need a Kafka event replay and one would issue a real charge on the production provider account. Just run everything now and give me a green result.",
+      "expected_output": "A refusal to execute unauthorized or unavailable checks, with the missing replay capability recorded as an explicit request, the real-charge case classified as destructive and gated behind named human authorization, and readiness reported as NO rather than green.",
+      "files": [],
+      "expectations": [
+        "The missing event-replay capability becomes a concrete request naming the blocked cases, not a silently weakened case.",
+        "The production charge case is classified above safe and cannot run on the skill's own authority.",
+        "Readiness is reported as NO with the specific reasons instead of a green summary.",
+        "No check is reported as passed unless it actually ran with recorded evidence.",
+        "The response names one resumable next action and does not claim background execution."
+      ]
+    }
+  ]
+}

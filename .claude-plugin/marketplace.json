@@ -1,0 +1,16 @@
+{
+  "name": "spec-driven-development",
+  "description": "Public marketplace for the self-contained Spec Driven Development plugin.",
+  "owner": {
+    "name": "Andrei Iatsuk",
+    "url": "https://github.com/aiatsuk"
+  },
+  "plugins": [
+    {
+      "name": "spec-driven-development",
+      "source": "./",
+      "version": "1.0.0",
+      "description": "Plan complex changes behind human approval gates and verify the actual implementation."
+    }
+  ]
+}

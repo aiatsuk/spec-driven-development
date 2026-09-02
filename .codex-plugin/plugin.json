@@ -1,0 +1,36 @@
+{
+  "name": "spec-driven-development",
+  "version": "1.0.0",
+  "description": "Approval-gated specification planning and actual-diff verification for complex software changes.",
+  "author": {
+    "name": "Andrei Iatsuk",
+    "url": "https://github.com/aiatsuk"
+  },
+  "homepage": "https://github.com/aiatsuk/spec-driven-development",
+  "repository": "https://github.com/aiatsuk/spec-driven-development",
+  "keywords": [
+    "specification",
+    "planning",
+    "verification",
+    "human-approval",
+    "software-delivery"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Spec Driven Development",
+    "shortDescription": "Plan, approve, and verify complex software changes.",
+    "longDescription": "Turns rough intent into an approval-gated specification, then verifies implementation against the accepted semantic baseline and the actual diff.",
+    "developerName": "Andrei Iatsuk",
+    "category": "Productivity",
+    "capabilities": [
+      "Specification planning",
+      "Human approval gates",
+      "Risk analysis",
+      "Actual-diff verification"
+    ],
+    "defaultPrompt": [
+      "Use $spec-driven-development to turn this idea into an approval-gated specification.",
+      "Use $spec-driven-development to verify this change against its intended behavior."
+    ]
+  }
+}
