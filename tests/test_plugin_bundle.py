@@ -28,7 +28,7 @@ class SpecDrivenDevelopmentBundleTest(unittest.TestCase):
         self.assertEqual("spec-driven-development", codex["name"])
         self.assertEqual(codex["name"], claude["name"])
         self.assertEqual(codex["name"], marketplace["name"])
-        self.assertEqual("1.0.0", codex["version"])
+        self.assertEqual("1.0.1", codex["version"])
         self.assertEqual(codex["version"], claude["version"])
         self.assertEqual(codex["version"], marketplace["version"])
 

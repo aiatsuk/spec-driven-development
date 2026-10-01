@@ -1134,8 +1134,24 @@ def cmd_complete(args: argparse.Namespace) -> dict[str, Any]:
 
 def scalar(text: str) -> Any:
     value = text.strip()
-    if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
-        return value[1:-1]
+    if value.startswith('"'):
+        try:
+            parsed = json.loads(value)
+        except json.JSONDecodeError as error:
+            raise FlowError("config_invalid", "Invalid quoted scalar in verification YAML.", value=value) from error
+        if not isinstance(parsed, str):
+            raise FlowError("config_invalid", "Expected a quoted scalar string.")
+        return parsed
+    if value.startswith("'"):
+        if not re.fullmatch(r"'(?:[^']|'')*'", value):
+            raise FlowError("config_invalid", "Invalid single-quoted scalar in verification YAML.", value=value)
+        return value[1:-1].replace("''", "'")
+    if value and (value[0] in "[]{}|>*&!%@`," or re.search(r":(?:\s|$)", value)):
+        raise FlowError(
+            "config_invalid",
+            "Unsupported or invalid YAML scalar; use block mappings and scalar lists, or JSON configuration.",
+            value=value,
+        )
     lowered = value.lower()
     if lowered in {"true", "yes", "on"}:
         return True
@@ -1156,49 +1172,77 @@ def parse_simple_yaml(text: str) -> dict[str, Any]:
     Supported: nested maps, lists of scalars, scalars, comments, blank lines.
     Anything else is a configuration error rather than a silent misread.
     """
-    root: dict[str, Any] = {}
-    stack: list[dict[str, Any]] = [{"indent": -1, "container": root, "owner": None, "key": None}]
+    if any(ord(char) < 32 and char not in "\n\r\t" or ord(char) == 127 for char in text):
+        raise FlowError("config_invalid", "Control characters are not valid verification YAML.")
+    lines: list[tuple[int, int, str]] = []
     for number, raw in enumerate(text.splitlines(), start=1):
-        line = re.sub(r"(^|\s)#.*$", "", raw).rstrip()
+        quote = ""
+        escaped = False
+        end = len(raw)
+        for index, char in enumerate(raw):
+            if escaped:
+                escaped = False
+            elif char == "\\" and quote == '"':
+                escaped = True
+            elif quote == "'" and char == "'" and index + 1 < len(raw) and raw[index + 1] == "'":
+                escaped = True
+            elif quote and char == quote:
+                quote = ""
+            elif not quote and char in "\"'" and (index == 0 or raw[index - 1].isspace() or raw[index - 1] == ":"):
+                quote = char
+            elif not quote and char == "#" and (index == 0 or raw[index - 1].isspace()):
+                end = index
+                break
+        line = raw[:end].rstrip()
         if not line.strip():
             continue
         if "\t" in line[: len(line) - len(line.lstrip())]:
             raise FlowError("config_invalid", f"Tab indentation at line {number}; use spaces.", line=raw)
         indent = len(line) - len(line.lstrip(" "))
         body = line.strip()
-        is_item = body.startswith("- ") or body == "-"
-        while len(stack) > 1 and (
-            indent < stack[-1]["indent"]
-            or (indent == stack[-1]["indent"] and not is_item)
-            or (indent == stack[-1]["indent"] and is_item and isinstance(stack[-1]["container"], dict) and stack[-1]["container"])
-        ):
-            stack.pop()
-        frame = stack[-1]
-        if is_item:
-            container = frame["container"]
-            if isinstance(container, dict) and not container and frame["owner"] is not None:
-                container = []
-                frame["owner"][frame["key"]] = container
-                frame["container"] = container
-            if not isinstance(container, list):
-                raise FlowError("config_invalid", f"Unexpected list item at line {number}.", line=raw)
-            container.append(scalar(body[1:].strip()))
-            continue
-        if ":" not in body:
-            raise FlowError("config_invalid", f"Expected 'key: value' at line {number}.", line=raw)
-        key, _, rest = body.partition(":")
-        container = frame["container"]
-        if not isinstance(container, dict):
-            raise FlowError("config_invalid", f"Unexpected mapping key at line {number}.", line=raw)
-        key = key.strip()
-        rest = rest.strip()
-        if rest:
-            container[key] = scalar(rest)
-        else:
-            child: dict[str, Any] = {}
-            container[key] = child
-            stack.append({"indent": indent, "container": child, "owner": container, "key": key})
-    return root
+        lines.append((number, indent, body))
+
+    def is_item(body: str) -> bool:
+        return body == "-" or body.startswith("- ")
+
+    def block(index: int, indent: int, sequence: bool = False) -> tuple[Any, int]:
+        result: Any = [] if sequence else {}
+        while index < len(lines):
+            number, level, body = lines[index]
+            if level < indent or level == indent and sequence and not is_item(body):
+                break
+            if level != indent:
+                raise FlowError("config_invalid", f"Unexpected indentation at line {number}.")
+            if sequence:
+                value = body[1:].strip()
+                if not value:
+                    raise FlowError("config_invalid", f"Only scalar list items are supported at line {number}.")
+                result.append(scalar(value))
+                index += 1
+                continue
+            match = re.fullmatch(r"([A-Za-z_][A-Za-z0-9_.-]*):(?:\s+(.*))?", body)
+            if not match:
+                raise FlowError("config_invalid", f"Expected an unquoted 'key: value' at line {number}.")
+            key, rest = match.group(1), match.group(2)
+            if key in result:
+                raise FlowError("config_invalid", f"Duplicate mapping key {key!r} at line {number}.")
+            index += 1
+            if rest:
+                result[key] = scalar(rest)
+            elif index < len(lines) and (lines[index][1] > indent or lines[index][1] == indent and is_item(lines[index][2])):
+                result[key], index = block(index, lines[index][1], is_item(lines[index][2]))
+            else:
+                result[key] = {}
+        return result, index
+
+    if not lines:
+        return {}
+    if lines[0][1] != 0 or is_item(lines[0][2]):
+        raise FlowError("config_invalid", "The verification config must be a top-level mapping without indentation.")
+    result, end = block(0, 0)
+    if end != len(lines):
+        raise FlowError("config_invalid", f"Unexpected YAML content at line {lines[end][0]}.")
+    return result
 
 
 def deep_merge(base: dict[str, Any], extra: dict[str, Any]) -> dict[str, Any]:
