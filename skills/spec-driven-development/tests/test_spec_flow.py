@@ -1407,6 +1407,46 @@ class ConfigTests(unittest.TestCase):
         parsed = spec_flow.parse_simple_yaml("verification:\r\n  minimum_iterations: 2 # keep it low\r\n")
         self.assertEqual(2, parsed["verification"]["minimum_iterations"])
 
+    def test_fallback_parser_rejects_malformed_yaml(self) -> None:
+        cases = {
+            "unterminated flow list": "verification:\n  critical_areas: [payments, auth\n",
+            "duplicate key": "verification:\n  minimum_iterations: 2\n  minimum_iterations: 3\n",
+            "bad indentation": "verification:\n    minimum_iterations: 2\n  maximum_iterations: 4\n",
+            "control character": "verification:\n  default_mode: lite\x07\n",
+        }
+        for label, body in cases.items():
+            with self.subTest(label):
+                with self.assertRaises(spec_flow.FlowError) as error:
+                    spec_flow.parse_simple_yaml(body)
+                self.assertEqual("config_invalid", error.exception.code)
+
+    def test_fallback_parser_reads_nested_mapping_with_scalar_list(self) -> None:
+        parsed = spec_flow.parse_simple_yaml(
+            "verification:\n"
+            "  default_mode: standard\n"
+            "  require_cleanup: false\n"
+            "  critical_areas:\n"
+            "    - payments\n"
+            "    - 'auth'\n"
+            "  required_risk_coverage:\n"
+            "    critical: 100\n"
+            "    medium: 70\n"
+            "test_environment:\n"
+            "  name: \"local\"\n"
+        )
+        self.assertEqual(
+            {
+                "verification": {
+                    "default_mode": "standard",
+                    "require_cleanup": False,
+                    "critical_areas": ["payments", "auth"],
+                    "required_risk_coverage": {"critical": 100, "medium": 70},
+                },
+                "test_environment": {"name": "local"},
+            },
+            parsed,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
