@@ -1,0 +1,44 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to publish, for example v1.0.1
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Check versions and changelog
+        run: python3 scripts/release.py check --tag "$TAG"
+      - name: Run tests
+        run: |
+          python3 -B -m unittest discover -s tests
+          python3 -B -m unittest discover -s skills/spec-driven-development/tests
+          python3 -B scripts/public_check.py
+      - name: Publish GitHub Release
+        run: |
+          VERSION="$(python3 scripts/release.py version)"
+          python3 scripts/release.py notes --tag "$TAG" > "$RUNNER_TEMP/notes.md"
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            gh release edit "$TAG" --title "Spec Driven Development ${VERSION}" --notes-file "$RUNNER_TEMP/notes.md"
+          else
+            gh release create "$TAG" --verify-tag --title "Spec Driven Development ${VERSION}" --notes-file "$RUNNER_TEMP/notes.md"
+          fi
