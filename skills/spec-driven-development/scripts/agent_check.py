@@ -11,10 +11,23 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent.parent
+MODEL_ALIASES = {"inherit", "default", "best", "fable", "opus", "sonnet", "haiku", "opus[1m]", "sonnet[1m]", "opusplan"}
 
 
 def fail(message: str) -> None:
     raise SystemExit(f"FAIL: {message}")
+
+
+def scalar(raw: str) -> str | None:
+    """A one-line YAML scalar without its quotes or trailing comment; None when malformed."""
+    raw = raw.strip(" \t")
+    if raw[:1] in ("'", '"'):
+        end = raw.find(raw[0], 1)
+        rest = raw[end + 1:] if end != -1 else ""
+        if end == -1 or not (rest.strip(" \t") == "" or re.match(r"[ \t]+#", rest)):
+            return None
+        return raw[1:end]
+    return re.sub(r"[ \t]+#.*$", "", raw).strip(" \t")
 
 
 def validate_frontmatter() -> None:
@@ -22,10 +35,27 @@ def validate_frontmatter() -> None:
     match = re.match(r"\A---\n(.*?)\n---\n", text, flags=re.DOTALL)
     if not match:
         fail("SKILL.md frontmatter is missing")
-    lines = [line for line in match.group(1).splitlines() if line.strip()]
-    keys = [line.split(":", 1)[0].strip() for line in lines if not line.startswith((" ", "\t"))]
-    if keys != ["name", "description"]:
-        fail(f"frontmatter must contain only name and description, got {keys}")
+    entries = []
+    for line in match.group(1).splitlines():
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        entry = re.fullmatch(r"([A-Za-z][A-Za-z0-9_-]*)[ \t]*:(?:[ \t]+(.*))?", line)
+        if not entry:
+            fail(f"unsupported frontmatter line {line!r}")
+        entries.append((entry.group(1), entry.group(2) or ""))
+    keys = [key for key, _ in entries]
+    if keys[:2] != ["name", "description"] or not set(keys[2:]) <= {"model", "effort"} or len(set(keys)) != len(keys):
+        fail(f"frontmatter must contain name and description, optionally model and effort, each once, got {keys}")
+    for key, raw in entries:
+        if key not in ("model", "effort"):
+            continue
+        value = scalar(raw)
+        if key == "model":
+            valid = value in MODEL_ALIASES or bool(value and re.fullmatch(r"claude-[a-z0-9]+(?:[.-][a-z0-9]+)*(?:\[1m\])?", value))
+        else:
+            valid = value in {"low", "medium", "high", "xhigh", "max"}
+        if not valid:
+            fail(f"{key} has an unsupported value {raw.strip()!r}")
     if "name: spec-driven-development" not in match.group(1):
         fail("frontmatter name does not match the directory")
     description_match = re.search(r'^description:\s*["\'](.*)["\']$', match.group(1), flags=re.MULTILINE)
