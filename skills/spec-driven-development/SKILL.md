@@ -1,6 +1,8 @@
 ---
 name: spec-driven-development
 description: "Turn rough feature ideas, voice transcripts, or /spec commands into recursively decomposed, human-reviewed, approval-gated specifications, then govern implementation and actual-diff verification. Also runs /spec check: given a PR, ticket, branch, diff, or spoken description, it reconstructs intent, iteratively generates and filters risks and corner cases, writes detailed documented test cases, and returns one Verification Brief. Use for non-trivial features, migrations, cross-component or high-risk changes, plans that must be approved before coding, requests to decompose, review, approve, apply, verify, or iterate from intent through tested delivery, and requests to work out what a change could break and how to prove it. Do not use for one-step mechanical edits, self-contained factual answers, routine unit tests for touched files, or plain code-review summaries."
+model: opus
+effort: high
 ---
 
 # Spec-Driven Development
